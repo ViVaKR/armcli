@@ -14,7 +14,7 @@
 #     없으면 tar.gz 파일만 만들고, 릴리스 업로드는 수동으로 안내한다.
 #
 # 사용법:
-#   ./release.sh 0.2.0
+#   ./release.sh 0.3.0
 
 set -euo pipefail
 

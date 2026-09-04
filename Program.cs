@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 // ---------------------------------------------------------------------
@@ -8,7 +8,7 @@ if (args.Length > 0 && (args[0] == "--version" || args[0] == "-v"))
 {
   var version = Assembly.GetExecutingAssembly()
                         .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-                        .InformationalVersion ?? "0.1.0";
+                        .InformationalVersion ?? "0.3.0";
   Console.WriteLine($"armcli version {version}");
   return;
 }
@@ -26,6 +26,15 @@ if (args.Length > 0 && args[0] == "list")
   return;
 }
 
+// ---------------------------------------------------------------------
+// init — 완전한 프로젝트(오케스트레이터 + 어셈블리 + 언어 라이브러리) 생성
+// ---------------------------------------------------------------------
+if (args.Length > 0 && args[0] == "init")
+{
+  ProjectInit.Run(args);
+  return;
+}
+
 if (args.Length < 2 || args[0] != "new")
 {
   PrintUsage();
@@ -36,15 +45,18 @@ string fileNameArg = args[1];
 
 // -----------------------------------------------------------------------
 // 옵션 파싱
-//   -n <label>        : 라벨 이름 (기본값: 파일 이름)
-//   -t <template>      : 템플릿 종류 (bare | function | loop | neon), 기본값 function
-//   --os <macos|linux>  : 심볼 규칙 (기본값: 현재 실행 중인 OS 자동 감지)
-//   --force               : 기존 파일 있어도 덮어쓰기
-//   --stdout               : 파일로 쓰지 않고 터미널에만 출력
+//   -n <label>              : 라벨 이름 (기본값: 파일 이름)
+//   -t <template>           : 템플릿 종류 (bare | function | loop | neon), 기본값 function
+//   -o <dir>                : 출력 디렉토리 (기본값: 현재 디렉토리)
+//   --os <macos|linux>      : 심볼 규칙 (기본값: 현재 실행 중인 OS 자동 감지)
+//   --force                 : 기존 파일 있어도 덮어쓰기
+//   --stdout                : 파일로 쓰지 않고 터미널에만 출력
 // -----------------------------------------------------------------------
+
 string labelName = Path.GetFileNameWithoutExtension(fileNameArg);
 string templateKey = "function";
 string? osOverride = null;
+string outputDir = ".";
 bool force = false;
 bool toStdout = false;
 
@@ -57,6 +69,9 @@ for (int i = 2; i < args.Length; i++)
       break;
     case "-t" when i + 1 < args.Length:
       templateKey = args[++i].ToLowerInvariant();
+      break;
+    case "-o" when i + 1 < args.Length:
+      outputDir = args[++i];
       break;
     case "--os" when i + 1 < args.Length:
       osOverride = args[++i].ToLowerInvariant();
@@ -84,6 +99,13 @@ if (!Templates.Descriptions.ContainsKey(templateKey))
 string fileName = fileNameArg.EndsWith(".S") || fileNameArg.EndsWith(".s")
     ? fileNameArg
     : $"{fileNameArg}.S";
+
+// -o 로 출력 디렉토리가 지정되면 그 안에 생성 (표준 출력 모드에서는 무시)
+if (!toStdout && !string.IsNullOrWhiteSpace(outputDir) && outputDir != ".")
+{
+  Directory.CreateDirectory(outputDir);
+  fileName = Path.Combine(outputDir, fileName);
+}
 
 // -----------------------------------------------------------------------
 // OS별 심볼 규칙 결정
@@ -124,15 +146,22 @@ static void PrintUsage()
 {
   Console.WriteLine("""
     Usage:
-      armcli new <filename> [-n <label>] [-t <template>] [--os macos|linux] [--force] [--stdout]
+      armcli new <filename> [-n <label>] [-t <template>] [-o <dir>] [--os macos|linux] [--force] [--stdout]
+      armcli init -n <ProjectName> [-o <dir>] [--rust] [--go] [--dotnet] [--no-rust] [--os macos|linux] [--force]
       armcli list
       armcli --version
 
-    예시:
-      armcli new hello                      # hello.S, function 템플릿, 현재 OS 기준 자동 판단
+    새 파일 예시:
+      armcli new hello                       # hello.S, function 템플릿, 현재 OS 기준 자동 판단
       armcli new hello.s -t bare             # 전처리기 안 거치는 최소형 템플릿
-      armcli new loop -t loop --os linux      # Linux ELF 심볼 규칙(언더스코어 없음)으로 생성
-      armcli new vec -t neon --stdout          # 파일로 안 쓰고 터미널에 미리보기만
+      armcli new loop -t loop --os linux     # Linux ELF 심볼 규칙(언더스코어 없음)으로 생성
+      armcli new vec -t neon --stdout        # 파일로 안 쓰고 터미널에 미리보기만
+      armcli new HelloWorld -n main -o .     # ./HelloWorld.S, 라벨은 _main/main
+
+    새 프로젝트 예시:
+      armcli init -n HelloWorld -o .                  # Zig 오케스트레이터 + Rust 라이브러리 + src/Main.S
+      armcli init -n HelloWorld -o . --go --dotnet     # Go, .NET 라이브러리까지 함께 생성
+      armcli init -n HelloWorld -o . --no-rust --go    # Rust 빼고 Go만
     """);
 }
 

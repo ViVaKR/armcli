@@ -1,22 +1,38 @@
 # homebrew armcli
 
-## 스크립트 배포
+## 최종 배포 스크립트
 
 ```bash
 
+```
+
+---
+
+## 스크립트 배포
+
+```bash
 # 프로젝트 루트에서 
 ./scripts/release.sh 0.3.0
-
 brew update
 brew upgrade
 armcli --version
-
 ```
 
+---
 
 ## 수작업 배포
 
 ```bash
+cd armcli
+dotnet build
+dotnet run -- init -n HelloWorld -o /tmp/test-out --go --dotnet
+tree /tmp/test-out
+
+cd ~/GitWorkspace/armcli   # 실제 경로에 맞게
+dotnet build               # 컴파일 확인
+dotnet run -- init -n TestProj -o /tmp/final-check --go --dotnet --force
+cd /tmp/final-check/TestProj
+zig build run               # 이제 8/8 성공해야 정상
 
 dotnet publish -c Release -r osx-arm64
 tar -czvf armcli-v0.1.0-osx-arm64.tar.gz -C bin/Release/net10.0/osx-arm64/publish armcli
