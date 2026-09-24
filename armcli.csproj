@@ -9,13 +9,14 @@
     <AssemblyName>armcli</AssemblyName>
 
     <!-- 프로젝트 버전 -->
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
 
     <!-- Native AOT 및 완전 단일 바이너리 설정 -->
     <PublishAot>true</PublishAot>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <InvariantGlobalization>true</InvariantGlobalization>
+
     <!-- 커밋 해시 자동 부착 기능 끄기 -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
