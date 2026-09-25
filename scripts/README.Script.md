@@ -11,8 +11,8 @@
 ## 스크립트 배포
 
 ```bash
-# 프로젝트 루트에서 
-./scripts/release.sh 0.3.0
+# 프로젝트 루트에서
+./scripts/release.sh 0.3.6
 brew update
 brew upgrade
 armcli --version
@@ -80,4 +80,3 @@ armcli --version
 **루비 파일 생성 및 작성 규칙**
 
 ---
-

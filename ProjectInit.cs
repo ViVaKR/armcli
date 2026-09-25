@@ -78,7 +78,7 @@ internal static class ProjectInit
     Console.WriteLine($" armcli init: {pascalName}");
     Console.WriteLine($" 위치: {Path.GetFullPath(root)}");
     Console.WriteLine($" 대상 OS: {osLabel}");
-    Console.WriteLine($" 구성: Zig 오케스트레이터 + Assembly(src/Main.S)"
+    Console.WriteLine($" 구성: hun-build.cs(.NET) 오케스트레이터 + Assembly(src/Main.S)"
       + (withRust ? " + Rust(RustLibs/rust_core)" : "")
       + (withGo ? " + Go(GoLibs)" : "")
       + (withDotnet ? " + .NET(DotnetLibs)" : ""));
@@ -116,14 +116,25 @@ internal static class ProjectInit
       File.WriteAllText(Path.Combine(dotnetLibs, "Bridge.cs"), DotnetTemplates.BridgeCs());
       File.WriteAllText(Path.Combine(dotnetLibs, "CalculateLib.cs"), DotnetTemplates.CalculateLibCs());
     }
+    // 🆕 --- 1. [대제독의 특명] src/includes/hun.macros.inc 공용 매크로 무기고 자동 하사! ---
+    string includesDir = Path.Combine(root, "src", "includes");
+    Directory.CreateDirectory(includesDir); // 방어적 폴더 생성
+    File.WriteAllText(
+        Path.Combine(includesDir, "hun.macros.inc"),
+        AsmTemplates.HunMacrosInc()); // 웅장한 매크로 원본 텍스트 분출
+
+    // 🆕 --- 2. [최첨단 화력] 프로젝트 루트에 턱시도 오케스트레이터(hun-build.cs) 자동 장착! ---
+    File.WriteAllText(
+        Path.Combine(root, "hun-build.cs"),
+        DotnetTemplates.HunBuildCs()); // 우리가 함께 박멸한 as+ld 무결점 C# 스크립트 분출
 
     // --- 어셈블리 진입점 ---
     File.WriteAllText(
       Path.Combine(root, "src", "Main.S"),
-      AsmTemplates.MainS(pascalName, symbolPrefix, osLabel));
+      AsmTemplates.MainS(pascalName, symbolPrefix, osLabel, withDotnet));
 
     // --- 빈 디렉토리 자리 표시(.gitkeep) ---
-    foreach (var dir in new[] { "contants", "data", "includes", "libs" })
+    foreach (var dir in new[] { "constants", "data", "includes", "libs" })
     {
       File.WriteAllText(Path.Combine(root, "src", dir, ".gitkeep"), "");
     }
@@ -137,7 +148,7 @@ internal static class ProjectInit
     Console.WriteLine();
     Console.WriteLine("다음 단계:");
     Console.WriteLine($"  cd {root}");
-    Console.WriteLine("  zig build run");
+    Console.WriteLine("  dotnet ./hun-build.cs");
   }
 
   private static void CreateDirectories(string root, bool withRust, bool withGo, bool withDotnet)
@@ -156,7 +167,7 @@ internal static class ProjectInit
       Directory.CreateDirectory(Path.Combine(root, "app", "DotnetLibs"));
 
     Directory.CreateDirectory(Path.Combine(root, "src"));
-    foreach (var dir in new[] { "contants", "data", "includes", "libs" })
+    foreach (var dir in new[] { "constants", "data", "includes", "libs" })
     {
       Directory.CreateDirectory(Path.Combine(root, "src", dir));
     }
@@ -168,7 +179,7 @@ internal static class ProjectInit
   /// </summary>
   private static string ToPascalCase(string input)
   {
-    var parts = input.Split(new[] { '-', '_', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+    var parts = input.Split(['-', '_', ' '], StringSplitOptions.RemoveEmptyEntries);
     if (parts.Length == 0) return input;
 
     var sb = new StringBuilder();

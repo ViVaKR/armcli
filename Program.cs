@@ -8,7 +8,7 @@ if (args.Length > 0 && (args[0] == "--version" || args[0] == "-v"))
 {
   var version = Assembly.GetExecutingAssembly()
                         .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-                        .InformationalVersion ?? "0.3.0";
+                        .InformationalVersion ?? "0.3.1";
   Console.WriteLine($"armcli version {version}");
   return;
 }
@@ -159,7 +159,7 @@ static void PrintUsage()
       armcli new HelloWorld -n main -o .     # ./HelloWorld.S, 라벨은 _main/main
 
     새 프로젝트 예시:
-      armcli init -n HelloWorld -o .                  # Zig 오케스트레이터 + Rust 라이브러리 + src/Main.S
+      armcli init -n HelloWorld -o .                   # Zig 오케스트레이터 + Rust 라이브러리 + src/Main.S
       armcli init -n HelloWorld -o . --go --dotnet     # Go, .NET 라이브러리까지 함께 생성
       armcli init -n HelloWorld -o . --no-rust --go    # Rust 빼고 Go만
     """);

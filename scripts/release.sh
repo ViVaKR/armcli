@@ -14,7 +14,7 @@
 #     없으면 tar.gz 파일만 만들고, 릴리스 업로드는 수동으로 안내한다.
 #
 # 사용법:
-#   ./release.sh 0.3.0
+# ./release.sh 0.3.1
 
 set -euo pipefail
 
@@ -142,19 +142,40 @@ cat "$RB_FILE"
 # -----------------------------------------------------------------------
 # 7. 탭 레포: 커밋 + push
 # -----------------------------------------------------------------------
-echo "==> 7. 탭 레포 커밋/push"
+echo "==> 7. 탭 레포 커밋/push 및 v${NEW_VERSION} 태그/릴리스 자동 선포"
 cd "$TAP_REPO_DIR"
+
+# 혹시 로컬이나 원격에 예전 작업 중 꼬인 동일 태그가 있다면 우회 및 클린 청소
+pcall_tag_del() { git tag -d "$TAG" 2>/dev/null || true; }
+pcall_tag_del
+
 git add armcli.rb
 git commit -m "chore: bump armcli to ${TAG}
 
 - url/sha256/version 을 ${TAG} 릴리스 자산 기준으로 갱신
 - 자산: ${ASSET_NAME}
 - sha256: ${SHA256}"
+
+# 🎯 탭 레포 원격지 main 브랜치 전방 압송 푸시
 git push origin main
+
+# 🎯 탭 레포지토리에도 대제독의 v0.3.5 공식 깃 태그 주입!
+git tag -a "$TAG" -m "homebrew-armcli ${TAG} 릴리스"
+git push origin "$TAG"
+
+# 🎯 탭 레포지토리 웹 화면 우측 하단(Releases)에 최신 버전을 선포하고 왕좌에 앉힙니다!
+if command -v gh >/dev/null 2>&1; then
+    gh release create "$TAG" \
+        --repo "$TAP_GITHUB_REPO" \
+        --target main \
+        --title "armcli ${TAG}" \
+        --notes "homebrew-armcli ${TAG} — Homebrew 공식 자산 갱신 완료"
+fi
 
 # -----------------------------------------------------------------------
 # 8. 정리 + 검증 안내
 # -----------------------------------------------------------------------
+cd "$DEV_REPO_DIR"
 rm -f "${DEV_REPO_DIR}/${ASSET_NAME}"
 
 echo "════════════════════════════════════════"
