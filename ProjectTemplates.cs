@@ -755,7 +755,7 @@ internal static class AsmTemplates
 
 internal static class ReadmeTemplates
 {
-    public static string ProjectReadme(string projectName, bool withRust, bool withGo, bool withDotnet)
+    public static string ProjectReadme(string projectName, bool withRust, bool withGo, bool withDotnet, bool withPwsh)
     {
         var libs = new List<string>();
         if (withRust) libs.Add("- **Rust** — `app/RustLibs/rust_core` (staticlib, `add_two_numbers`, `rust_hello`)");
@@ -767,6 +767,7 @@ internal static class ReadmeTemplates
         if (withRust) tools.Add("- **Rust (cargo)** — Rust 라이브러리 빌드에 필요");
         if (withGo) tools.Add("- **Go** — Go 라이브러리 빌드에 필요");
         if (withDotnet) tools.Add("- **.NET SDK 10** — .NET 라이브러리 빌드에 필요 (`zig build run` 사용 시)");
+        if (withPwsh) tools.Add("- **PowerShell 7** — ./hun-build.ps1 실행에 필요");
         string toolsSection = string.Join("\n", tools);
 
         return $"""

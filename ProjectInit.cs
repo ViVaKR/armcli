@@ -16,6 +16,7 @@ internal static class ProjectInit
     bool withGo = false;
     bool withDotnet = false;
     bool withRust = true; // 기본으로 켜짐 — 강좌 기본 언어
+    bool withPwsh = false;
     string? osOverride = null;
 
     for (int i = 1; i < args.Length; i++)
@@ -42,6 +43,9 @@ internal static class ProjectInit
           break;
         case "--rust":
           withRust = true;
+          break;
+        case "--pwsh":
+          withPwsh = true;
           break;
         case "--no-rust":
           withRust = false;
@@ -81,7 +85,8 @@ internal static class ProjectInit
     Console.WriteLine($" 구성: hun-build.cs(.NET) 오케스트레이터 + Assembly(src/Main.S)"
       + (withRust ? " + Rust(RustLibs/rust_core)" : "")
       + (withGo ? " + Go(GoLibs)" : "")
-      + (withDotnet ? " + .NET(DotnetLibs)" : ""));
+      + (withDotnet ? " + .NET(DotnetLibs)" : "")
+      + (withPwsh ? " + PowerShell(hun-build.ps1)" : ""));
     Console.WriteLine("════════════════════════════════════════");
 
     CreateDirectories(root, withRust, withGo, withDotnet);
@@ -116,6 +121,17 @@ internal static class ProjectInit
       File.WriteAllText(Path.Combine(dotnetLibs, "Bridge.cs"), DotnetTemplates.BridgeCs());
       File.WriteAllText(Path.Combine(dotnetLibs, "CalculateLib.cs"), DotnetTemplates.CalculateLibCs());
     }
+
+    if (withPwsh)
+    {
+      string ps1 = Path.Combine(root, "hun-build.ps1");
+      File.WriteAllText(ps1, PwshTemplates.HunBuildPs1());
+      if (!OperatingSystem.IsWindows())
+        File.SetUnixFileMode(ps1, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute
+                                | UnixFileMode.GroupRead | UnixFileMode.OtherRead);
+    }
+
+
     // 🆕 --- 1. [대제독의 특명] src/includes/hun.macros.inc 공용 매크로 무기고 자동 하사! ---
     string includesDir = Path.Combine(root, "src", "includes");
     Directory.CreateDirectory(includesDir); // 방어적 폴더 생성
@@ -142,13 +158,15 @@ internal static class ProjectInit
     // --- README ---
     File.WriteAllText(
       Path.Combine(root, "README.md"),
-      ReadmeTemplates.ProjectReadme(pascalName, withRust, withGo, withDotnet));
+      ReadmeTemplates.ProjectReadme(pascalName, withRust, withGo, withDotnet, withPwsh));
 
     Console.WriteLine("생성 완료!");
     Console.WriteLine();
     Console.WriteLine("다음 단계:");
     Console.WriteLine($"  cd {root}");
+    Console.WriteLine("  zig build run");
     Console.WriteLine("  dotnet ./hun-build.cs");
+    if (withPwsh) Console.WriteLine("  pwsh ./hun-build.ps1");
   }
 
   private static void CreateDirectories(string root, bool withRust, bool withGo, bool withDotnet)

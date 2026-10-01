@@ -147,7 +147,7 @@ static void PrintUsage()
   Console.WriteLine("""
     Usage:
       armcli new <filename> [-n <label>] [-t <template>] [-o <dir>] [--os macos|linux] [--force] [--stdout]
-      armcli init -n <ProjectName> [-o <dir>] [--rust] [--go] [--dotnet] [--no-rust] [--os macos|linux] [--force]
+      armcli init -n <ProjectName> [-o <dir>] [--rust] [--go] [--pwsh] [--dotnet] [--no-rust] [--os macos|linux] [--force]
       armcli list
       armcli --version
 
