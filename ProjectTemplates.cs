@@ -494,7 +494,12 @@ Console.WriteLine("\n⚡ 즉시 실행 타격 감행!\n-------------------------
 var psiRun = new ProcessStartInfo(Path.Combine(".", outputFile)) { UseShellExecute = false };
 using var procRun = Process.Start(psiRun);
 procRun?.WaitForExit();
+
+var exitCode = procRun?.ExitCode ?? 0;
+
 Console.WriteLine("------------------------------------------------\n🏁 작전 종료 완료!");
+
+Environment.ExitCode = exitCode;
 
 public static class FolderFilterExtensions
 {

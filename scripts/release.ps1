@@ -26,10 +26,6 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $PSNativeCommandUseErrorActionPreference = $true
 
-if (-not (Test-Path (Join-Path $DevRepoDir '.git')) -or -not (Test-Path (Join-Path $DevRepoDir 'armcli.csproj'))) {
-  throw "armcli 레포 루트에서 실행해주세요."
-}
-
 $Tag = "v$NewVersion"
 $Rid = "osx-arm64"
 $DevRepoDir = $PWD.Path
@@ -37,6 +33,10 @@ $TapRepoDir = [System.IO.Path]::GetFullPath((Join-Path $DevRepoDir "../homebrew-
 $AssetName = "armcli-$Tag-$Rid.tar.gz"
 $GitHubRepo = "ViVaKR/armcli"
 $TapGitHubRepo = "ViVaKR/homebrew-armcli"
+
+if (-not (Test-Path (Join-Path $DevRepoDir '.git')) -or -not (Test-Path (Join-Path $DevRepoDir 'armcli.csproj'))) {
+  throw "armcli 레포 루트에서 실행해주세요."
+}
 
 Write-Host "════════════════════════════════════════" -ForegroundColor Cyan
 Write-Host " 🚀 armcli 릴리스 가동: $Tag" -ForegroundColor Green

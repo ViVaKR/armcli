@@ -1,5 +1,0 @@
----
-triple:          'arm64-apple-darwin'
-binary-path:     'bin/Release/net10.0/osx-arm64/native/armcli'
-relocations:     []
-...
