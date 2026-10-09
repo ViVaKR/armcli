@@ -160,7 +160,7 @@ static void PrintUsage()
 
     새 프로젝트 예시:
       armcli init -n HelloWorld -o .                   # Zig 오케스트레이터 + Rust 라이브러리 + src/Main.S
-      armcli init -n HelloWorld -o . --go --dotnet     # Go, .NET 라이브러리까지 함께 생성
+      armcli init -n HelloWorld -o . --go --dotnet --pwsh     # Go, .NET 라이브러리m pwsh 오케스트레이터 까지 함께 생성
       armcli init -n HelloWorld -o . --no-rust --go    # Rust 빼고 Go만
     """);
 }

@@ -47,6 +47,9 @@ internal static class ProjectInit
         case "--pwsh":
           withPwsh = true;
           break;
+        case "--no-pwsh":
+          withPwsh = false;
+          break;
         case "--no-rust":
           withRust = false;
           break;
